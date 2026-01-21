@@ -1,0 +1,20 @@
+.{
+    .name = .picoquic,
+    .version = "1.1.44",
+    .fingerprint = 0xa36357e9b30b6ef1,
+    .dependencies = .{
+        .picotls = .{
+            .path = "picotls",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "picoquic",
+        "picohttp",
+        "loglib",
+        "picoquicfirst",
+        "sample",
+        "picolog",
+    },
+}

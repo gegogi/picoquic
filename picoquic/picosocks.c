@@ -337,7 +337,7 @@ void picoquic_socks_cmsg_parse(
 {
     /* Assume that msg has been filled by a call to recvmsg */
 #if _WINDOWS
-    struct cmsghdr* cmsg;
+    LPWSACMSGHDR cmsg;
     WSAMSG* msg = (WSAMSG*)vmsg;
 
     /* Get the control information */
@@ -483,11 +483,11 @@ void picoquic_socks_cmsg_parse(
 }
 
 #ifdef _WINDOWS
-static void* cmsg_format_header_return_data_ptr(WSAMSG* msg, struct cmsghdr** last_cmsg, int * control_length,
+static void* cmsg_format_header_return_data_ptr(WSAMSG* msg, LPWSACMSGHDR* last_cmsg, int * control_length,
     INT cmsg_level, INT cmsg_type, size_t cmsg_data_len)
 {
     void* cmsg_data_ptr = NULL;
-    WSACMSGHDR* cmsg = (*last_cmsg == NULL)? WSA_CMSG_FIRSTHDR(msg): WSA_CMSG_NXTHDR(msg, *last_cmsg);
+    LPWSACMSGHDR cmsg = (*last_cmsg == NULL)? WSA_CMSG_FIRSTHDR(msg): WSA_CMSG_NXTHDR(msg, *last_cmsg);
 
     if (cmsg != NULL) {
         size_t cmsg_required_space = WSA_CMSG_SPACE(cmsg_data_len);
@@ -539,7 +539,7 @@ void picoquic_socks_cmsg_format(
 #ifdef _WINDOWS
     WSAMSG* msg = (WSAMSG*)vmsg;
     int control_length = 0;
-    struct cmsghdr* last_cmsg = NULL;
+    LPWSACMSGHDR last_cmsg = NULL;
     int is_null = 0;
     /* Format the control message */
     if (addr_from != NULL && addr_from->sa_family != 0) {

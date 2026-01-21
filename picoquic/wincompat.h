@@ -39,10 +39,12 @@
 extern "C" {
 #endif
 
+#ifndef __MINGW32__
     struct timezone {
         int tz_minuteswest;     /* minutes west of Greenwich */
         int tz_dsttime;         /* type of DST correction */
     };
+#endif
 
     int wintimeofday(struct timeval* tv, struct timezone* tz);
 

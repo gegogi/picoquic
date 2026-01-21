@@ -56,6 +56,9 @@
 #ifndef socklen_t
 #define socklen_t int
 #endif
+#ifndef EIO
+#define EIO 5
+#endif
 
 #else /* Linux */
 
