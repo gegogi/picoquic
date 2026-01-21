@@ -272,6 +272,8 @@ if(PICOQUIC_FETCH_PTLS)
     FetchContent_MakeAvailable(picotls)
 endif()
 
+OPTION(WITH_OPENSSL "build with OpenSSL" ON)
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(PTLS REQUIRED)
 message(STATUS "picotls/include: ${PTLS_INCLUDE_DIRS}" )
@@ -284,8 +286,6 @@ else()
     message(STATUS "PTLS compiled without support for Fusion")
     list(APPEND PICOQUIC_COMPILE_DEFINITIONS PTLS_WITHOUT_FUSION)
 endif()
-
-OPTION(WITH_OPENSSL "build with OpenSSL" ON)
 
 if(WITH_OPENSSL)
     find_package(OpenSSL REQUIRED)

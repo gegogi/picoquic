@@ -1,4 +1,4 @@
-# - Try to find Picotls
+﻿# - Try to find Picotls
 
 if (PICOQUIC_FETCH_PTLS)
     set(PTLS_CORE_LIBRARY picotls-core)
@@ -36,7 +36,7 @@ else(PICOQUIC_FETCH_PTLS)
             ${CMAKE_BINARY_DIR}/../picotls/include
             ../picotls/include/ )
 
-    set(PTLS_HINTS ${PTLS_PREFIX}/lib ${CMAKE_BINARY_DIR}/../picotls ../picotls)
+    set(PTLS_HINTS ${PTLS_PREFIX}/lib ${CMAKE_BINARY_DIR}/../picotls/build ../picotls/build ../picotls)
 
     find_library(PTLS_CORE_LIBRARY picotls-core HINTS ${PTLS_HINTS})
     find_library(PTLS_MINICRYPTO_LIBRARY picotls-minicrypto HINTS ${PTLS_HINTS})
@@ -56,38 +56,38 @@ else(PICOQUIC_FETCH_PTLS)
         find_library(PTLS_OPENSSL_LIBRARY picotls-openssl HINTS ${PTLS_HINTS})
         find_library(PTLS_FUSION_LIBRARY picotls-fusion HINTS ${PTLS_HINTS})
 
-        if(NOT PTLS_FUSION_LIBRARY)
-            include(FindPackageHandleStandardArgs)
-            # handle the QUIETLY and REQUIRED arguments and set PTLS_FOUND to TRUE
-            # if all listed variables are TRUE
+        # 1. 필수 체크 리스트 초기화
+        set(PTLS_CHECK_VARS PTLS_CORE_LIBRARY PTLS_MINICRYPTO_LIBRARY PTLS_INCLUDE_DIR)
 
-            find_package_handle_standard_args(PTLS REQUIRED_VARS
-                PTLS_CORE_LIBRARY
-                PTLS_OPENSSL_LIBRARY
-                PTLS_MINICRYPTO_LIBRARY
-                PTLS_INCLUDE_DIR)
+        # 2. OpenSSL이 켜져 있을 때만 체크 리스트에 추가
+        if(WITH_OPENSSL)
+            find_library(PTLS_OPENSSL_LIBRARY picotls-openssl HINTS ${PTLS_HINTS})
+            list(APPEND PTLS_CHECK_VARS PTLS_OPENSSL_LIBRARY)
+        endif()
 
-            if(PTLS_FOUND)
-                set(PTLS_LIBRARIES ${PTLS_CORE_LIBRARY} ${PTLS_OPENSSL_LIBRARY} ${PTLS_MINICRYPTO_LIBRARY})
-                set(PTLS_INCLUDE_DIRS ${PTLS_INCLUDE_DIR})
-                set(PTLS_WITH_FUSION_DEFAULT OFF)
-            endif()
+        # 3. Fusion 라이브러리 검색 (OpenSSL 여부와 상관없이 수행)
+        find_library(PTLS_FUSION_LIBRARY picotls-fusion HINTS ${PTLS_HINTS})
+        if(PTLS_FUSION_LIBRARY)
+            list(APPEND PTLS_CHECK_VARS PTLS_FUSION_LIBRARY)
+            set(PTLS_WITH_FUSION_DEFAULT ON)
         else()
-            include(FindPackageHandleStandardArgs)
-            # handle the QUIETLY and REQUIRED arguments and set PTLS_FOUND to TRUE
-            # if all listed variables are TRUE
-            find_package_handle_standard_args(PTLS REQUIRED_VARS
-                PTLS_CORE_LIBRARY
-                PTLS_OPENSSL_LIBRARY
-                PTLS_FUSION_LIBRARY
-                PTLS_MINICRYPTO_LIBRARY
-                PTLS_INCLUDE_DIR)
+            set(PTLS_WITH_FUSION_DEFAULT OFF)
+        endif()
 
-            if(PTLS_FOUND)
-                set(PTLS_LIBRARIES ${PTLS_CORE_LIBRARY} ${PTLS_OPENSSL_LIBRARY} ${PTLS_FUSION_LIBRARY} ${PTLS_MINICRYPTO_LIBRARY})
-                set(PTLS_INCLUDE_DIRS ${PTLS_INCLUDE_DIR})
-                set(PTLS_WITH_FUSION_DEFAULT ON)
+        # 4. 최종 통합 체크 호출
+        include(FindPackageHandleStandardArgs)
+        find_package_handle_standard_args(PTLS REQUIRED_VARS ${PTLS_CHECK_VARS})
+
+        # 5. 결과 변수 설정
+        if(PTLS_FOUND)
+            set(PTLS_LIBRARIES ${PTLS_CORE_LIBRARY} ${PTLS_MINICRYPTO_LIBRARY})
+            if(WITH_OPENSSL)
+                list(APPEND PTLS_LIBRARIES ${PTLS_OPENSSL_LIBRARY})
             endif()
+            if(PTLS_FUSION_LIBRARY)
+                list(APPEND PTLS_LIBRARIES ${PTLS_FUSION_LIBRARY})
+            endif()
+            set(PTLS_INCLUDE_DIRS ${PTLS_INCLUDE_DIR})
         endif()
     endif()
 endif(PICOQUIC_FETCH_PTLS)
