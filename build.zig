@@ -38,6 +38,7 @@ pub fn build(b: *std.Build) void {
         "-DPICOQUIC_WITH_MINICRYPTO",
         "-D_WINDOWS",
         "-DWIN32",
+        "-Wl,--allow-multiple-definition",
     };
 
     const build_flags = if (is_windows) windows_flags else common_flags;
@@ -100,6 +101,10 @@ pub fn build(b: *std.Build) void {
     });
 
     // Add include paths
+    // For Windows: add zig_compat first to override Zig's MinGW headers with static inline versions
+    if (is_windows) {
+        picoquic_core_module.addIncludePath(b.path("picoquic/zig_compat"));
+    }
     picoquic_core_module.addIncludePath(b.path("picoquic"));
     picoquic_core_module.addIncludePath(b.path("loglib"));
     picoquic_core_module.addIncludePath(b.path("picohttp"));
@@ -151,6 +156,9 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
+    if (is_windows) {
+        picoquic_log_module.addIncludePath(b.path("picoquic/zig_compat"));
+    }
     picoquic_log_module.addIncludePath(b.path("picoquic"));
     picoquic_log_module.addIncludePath(b.path("loglib"));
     picoquic_log_module.addIncludePath(b.path("picohttp"));
@@ -202,6 +210,9 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
+    if (is_windows) {
+        picohttp_core_module.addIncludePath(b.path("picoquic/zig_compat"));
+    }
     picohttp_core_module.addIncludePath(b.path("picoquic"));
     picohttp_core_module.addIncludePath(b.path("loglib"));
     picohttp_core_module.addIncludePath(b.path("picohttp"));
@@ -239,6 +250,9 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
+    if (is_windows) {
+        demo_module.addIncludePath(b.path("picoquic/zig_compat"));
+    }
     demo_module.addIncludePath(b.path("picoquic"));
     demo_module.addIncludePath(b.path("loglib"));
     demo_module.addIncludePath(b.path("picohttp"));
@@ -284,6 +298,9 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
+    if (is_windows) {
+        picolog_module.addIncludePath(b.path("picoquic/zig_compat"));
+    }
     picolog_module.addIncludePath(b.path("picoquic"));
     picolog_module.addIncludePath(b.path("loglib"));
     picolog_module.addIncludePath(picotls_dep.path("include"));
@@ -322,6 +339,9 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
+    if (is_windows) {
+        sample_module.addIncludePath(b.path("picoquic/zig_compat"));
+    }
     sample_module.addIncludePath(b.path("picoquic"));
     sample_module.addIncludePath(b.path("loglib"));
     sample_module.addIncludePath(picotls_dep.path("include"));
